@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Important Question</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #ffdde1, #ee9ca7);
+    overflow: hidden;
+    text-align: center;
+}
+
+h1 {
+    margin-top: 80px;
+    font-size: 2.5em;
+    color: #333;
+}
+
+.container {
+    position: relative;
+    height: 70vh;
+}
+
+button {
+    padding: 15px 30px;
+    font-size: 18px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    position: absolute;
+    transition: all 0.25s ease;
+}
+
+#yes {
+    background: #28a745;
+    color: white;
+    left: 40%;
+    top: 50%;
+}
+
+#no {
+    background: #dc3545;
+    color: white;
+    left: 55%;
+    top: 50%;
+}
+
+#popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#popup img {
+    width: 300px;
+    border-radius: 20px;
+}
+
+#popup h2 {
+    color: white;
+    margin-bottom: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Will you marry me? 💍</h1>
+
+<div class="container">
+    <button id="yes">YES 💚</button>
+    <button id="no">NO ❌</button>
+</div>
+
+<div id="popup">
+    <h2>Stop messing with me! 😼</h2>
+    <img src="./cat.png">
+</div>
+
+<!-- AUDIO -->
+<audio id="bgMusic" src="./bg.mp3" preload="auto" loop></audio>
+<audio id="runSound" src="./run.mp3" preload="auto"></audio>
+<audio id="yesSound" src="./yes.mp3" preload="auto"></audio>
+<audio id="boomSound" src="./boom.mp3" preload="auto"></audio>
+
+<script>
+let attempts = 0;
+let popupShown = false;
+
+const noBtn = document.getElementById("no");
+const yesBtn = document.getElementById("yes");
+const popup = document.getElementById("popup");
+
+const bgMusic = document.getElementById("bgMusic");
+const runSound = document.getElementById("runSound");
+const yesSound = document.getElementById("yesSound");
+const boomSound = document.getElementById("boomSound");
+
+// Start music on first click
+document.addEventListener("click", () => {
+    bgMusic.volume = 0.5;
+    bgMusic.play().catch(() => {});
+}, { once: true });
+
+function moveNoButton() {
+    attempts++;
+
+    runSound.currentTime = 0;
+    runSound.play().catch(() => {});
+
+    const maxX = window.innerWidth - noBtn.offsetWidth;
+    const maxY = window.innerHeight - noBtn.offsetHeight;
+
+    const x = Math.random() * maxX;
+    const y = Math.random() * maxY;
+
+    noBtn.style.left = x + "px";
+    noBtn.style.top = y + "px";
+
+    // PHASE 1: attempts 1–5
+    if (attempts <= 5) {
+        let scale = 1 + (attempts * 0.15);
+        yesBtn.style.transform = `scale(${scale})`;
+    }
+
+    // PHASE 2: attempts 6–10 (show popup ONCE)
+    if (attempts > 5 && attempts <= 10) {
+        if (!popupShown) {
+            popup.style.display = "flex";
+            boomSound.currentTime = 0;
+            boomSound.play().catch(() => {});
+            popupShown = true;
+
+            // Auto hide after 2 seconds (clean UX)
+            setTimeout(() => {
+                popup.style.display = "none";
+            }, 2000);
+        }
+
+        let scale = 1 + (attempts * 0.35);
+        yesBtn.style.transform = `scale(${scale})`;
+    }
+
+    // PHASE 3: after 10 tries
+    if (attempts > 10) {
+        noBtn.style.transform = "scale(0.2)";
+        noBtn.style.opacity = "0.5";
+    }
+}
+
+noBtn.addEventListener("mouseover", moveNoButton);
+noBtn.addEventListener("touchstart", moveNoButton);
+noBtn.addEventListener("click", moveNoButton);
+
+yesBtn.addEventListener("click", () => {
+    yesSound.currentTime = 0;
+    yesSound.play().catch(() => {});
+    bgMusic.play().catch(() => {});
+
+    const overlay = document.createElement("div");
+    overlay.style.position = "fixed";
+    overlay.style.top = "0";
+    overlay.style.left = "0";
+    overlay.style.width = "100%";
+    overlay.style.height = "100%";
+    overlay.style.background = "black";
+    overlay.style.display = "flex";
+    overlay.style.flexDirection = "column";
+    overlay.style.justifyContent = "center";
+    overlay.style.alignItems = "center";
+
+    overlay.innerHTML = `
+        <img src="./love.jpg" style="
+            width: 320px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        ">
+        <h1 style="color:white;">You just made me the happiest ❤️</h1>
+    `;
+
+    document.body.appendChild(overlay);
+});
+</script>
+
+</body>
+</html>
